@@ -17,8 +17,8 @@ InputParameters validParams<ReturnMappingModel>()
   params.addParam<unsigned int>("max_its", 100, "Maximum number of return mapping iterations");
   params.addParam<bool>("output_iteration_info", false, "Set true to output return mapping iteration information");
    params.addParam<bool>("output_iteration_info_on_error", false, "Set true to output return mapping iteration information when a step fails");
-  params.addParam<Real>("relative_tolerance", 1e-12, "Relative convergence tolerance for return mapping iteration");
-  params.addParam<Real>("absolute_tolerance", 1e-15, "Absolute convergence tolerance for return mapping iteration");
+  params.addParam<Real>("relative_tolerance", 1e-8, "Relative convergence tolerance for return mapping iteration");
+  params.addParam<Real>("absolute_tolerance", 1e-11, "Absolute convergence tolerance for return mapping iteration");
 
   return params;
 }
@@ -33,10 +33,10 @@ ReturnMappingModel::ReturnMappingModel(const InputParameters & parameters) :
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _effective_strain_increment(0.0)
 {
-  if (_relative_tolerance > 1e-12)
-    mooseWarning("relative_tolerance was set to: " << _relative_tolerance << " for model: " << _name << " Using values greater than the default tolerance (1e-12) is not recommended.");
-  if (_absolute_tolerance > 1e-15)
-    mooseWarning("absolute_tolerance was set to: " << _absolute_tolerance << " for model: " << _name << " Using values greater than the default tolerance (1e-18) is not recommended.");
+  if (_relative_tolerance > 1e-9)
+    mooseWarning("relative_tolerance was set to: " << _relative_tolerance << " for model: " << _name << " Using values greater than the default tolerance (1e-9) is not recommended.");
+  if (_absolute_tolerance > 1e-12)
+    mooseWarning("absolute_tolerance was set to: " << _absolute_tolerance << " for model: " << _name << " Using values greater than the default tolerance (1e-12) is not recommended.");
   if (_max_its < 100)
     mooseWarning("max_its was set to: " << _max_its << " for model: " << _name << " Using values less than the default (100) is not recommended.");
 }
@@ -191,16 +191,16 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/, unsigned qp,
 
         // If the difference between the upper and lower bounds is too close to machine epsilon
         // or the scalar increment is too close to machine epsilon, break
-//        if (converged(1e3 * residual, reference_residual) &&
-//            ((scalar_lower_bound > 0.0 &&
-//              (scalar_upper_bound - scalar_lower_bound) / (PETSC_MACHINE_EPSILON * scalar_lower_bound) <= 10.0) ||
-//             (residual != 0.0 &&
-//              scalar_old != 0.0 &&
-//              std::abs(scalar_increment) < 10.0 * PETSC_MACHINE_EPSILON * scalar_old)))
-//        {
-//          output_iter_info(iter_output, it, effective_trial_stress, scalar, residual, reference_residual);
-//          break;
-//        }
+        if (converged(1e3 * residual, reference_residual) &&
+            ((scalar_lower_bound > 0.0 &&
+              (scalar_upper_bound - scalar_lower_bound) / (PETSC_MACHINE_EPSILON * scalar_lower_bound) <= 10.0) ||
+             (residual != 0.0 &&
+              scalar_old != 0.0 &&
+              std::abs(scalar_increment) < 10.0 * PETSC_MACHINE_EPSILON * scalar_old)))
+        {
+          output_iter_info(iter_output, it, effective_trial_stress, scalar, residual, reference_residual);
+          break;
+        }
       }
 
       output_iter_info(iter_output, it, effective_trial_stress, scalar, residual, reference_residual);
