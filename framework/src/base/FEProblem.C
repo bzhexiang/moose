@@ -4294,7 +4294,7 @@ FEProblem::checkDependMaterialsHelper(const std::map<SubdomainID, std::vector<Mo
         }
 
         oss << "\nThis will result in ambiguous material property calculations and lead to incorrect results.\n";
-        mooseWarning(oss.str());
+        mooseError(oss.str());
         break;
       }
     }
